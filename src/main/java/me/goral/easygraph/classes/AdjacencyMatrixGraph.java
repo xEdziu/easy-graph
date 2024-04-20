@@ -1,66 +1,205 @@
 package me.goral.easygraph.classes;
 
-public class AdjacencyMatrixGraph extends Graph {
-    private boolean[][] adjMatrix;
+import java.util.*;
 
-    public AdjacencyMatrixGraph(int numVertices) {
-        super();
-        this.numVertices = numVertices;
-        adjMatrix = new boolean[numVertices][numVertices];
+public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
+    private final List<Vertex<V>> vertices;
+    private Edge<E>[][] adjacencyMatrix;
+
+    public AdjacencyMatrixGraph(boolean isDirected) {
+        super(isDirected);
+        vertices = new ArrayList<>();
+        adjacencyMatrix = (Edge<E>[][]) new Edge[0][0];
     }
 
-    public void addEdge(int v, int w) {
-        if (v >= numVertices || w >= numVertices || v < 0 || w < 0) {
-            throw new IllegalArgumentException("Vertex index out of bound");
-        }
-        if (!adjMatrix[v][w]) {  // Only add edge if it does not already exist
-            adjMatrix[v][w] = true;
-            adjMatrix[w][v] = true;
-            numEdges++;
-        }
+    @Override
+    public int numVertices() {
+        return vertices.size();
     }
 
-
-    public boolean isAdjacent(int v, int w) {
-        return adjMatrix[v][w];
+    @Override
+    public Iterable<Vertex<V>> vertices() {
+        return vertices;
     }
 
-    public void removeEdge(int v, int w) {
-        if (v >= numVertices || w >= numVertices || v < 0 || w < 0) {
-            throw new IllegalArgumentException("Vertex index out of bound");
-        }
-        if (adjMatrix[v][w]) {  // Only remove edge if it exists
-            adjMatrix[v][w] = false;
-            adjMatrix[w][v] = false;
-            numEdges--;
-        }
-    }
-
-
-    public void addVertex() {
-        boolean[][] newAdjMatrix = new boolean[numVertices + 1][numVertices + 1];
-        for (int i = 0; i < numVertices; i++) {
-            System.arraycopy(adjMatrix[i], 0, newAdjMatrix[i], 0, numVertices);
-        }
-        adjMatrix = newAdjMatrix;
-        numVertices++;
-    }
-
-    public void removeVertex(int v) {
-        boolean[][] newAdjMatrix = new boolean[numVertices - 1][numVertices - 1];
-        for (int i = 0; i < numVertices; i++) {
-            if (i == v) {
-                continue;
-            }
-            for (int j = 0; j < numVertices; j++) {
-                if (j == v) {
-                    continue;
+    @Override
+    public int numEdges() {
+        int count = 0;
+        for (Edge<E>[] matrix : adjacencyMatrix) {
+            for (Edge<E> eEdge : matrix) {
+                if (eEdge != null) {
+                    count++;
                 }
-                newAdjMatrix[i < v ? i : i - 1][j < v ? j : j - 1] = adjMatrix[i][j];
             }
         }
-        adjMatrix = newAdjMatrix;
-        numVertices--;
+        return count;
+    }
+
+    @Override
+    public Iterable<Edge<E>> edges() {
+        List<Edge<E>> result = new ArrayList<>();
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            for (int j = 0; j < adjacencyMatrix[i].length; j++) {
+                if (adjacencyMatrix[i][j] != null && (i < j || isDirected())) {
+                    result.add(adjacencyMatrix[i][j]);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean areAdjacent(Vertex<V> u, Vertex<V> v) {
+        int indexU = vertices.indexOf(u);
+        int indexV = vertices.indexOf(v);
+        return adjacencyMatrix[indexU][indexV] != null || adjacencyMatrix[indexV][indexU] != null;
+    }
+
+    @Override
+    public Optional<Edge<E>> getEdge(Vertex<V> u, Vertex<V> v) {
+        int indexU = vertices.indexOf(u);
+        int indexV = vertices.indexOf(v);
+        return Optional.ofNullable(adjacencyMatrix[indexU][indexV]);
+    }
+
+    @Override
+    public Vertex<V>[] endVertices(Edge<E> e) {
+        for (int i = 0; i < vertices.size(); i++) {
+            for (int j = 0; j < vertices.size(); j++) {
+                if (adjacencyMatrix[i][j] == e) {
+                    return new Vertex[] {vertices.get(i), vertices.get(j)};
+                }
+            }
+        }
+        throw new IllegalArgumentException("Edge not in graph.");
+    }
+
+    @Override
+    public Vertex<V> opposite(Vertex<V> v, Edge<E> e) {
+        Vertex<V>[] endpoints = endVertices(e);
+        if (endpoints[0].equals(v)) {
+            return endpoints[1];
+        } else if (endpoints[1].equals(v)) {
+            return endpoints[0];
+        }
+        throw new IllegalArgumentException("Edge not incident to vertex.");
+    }
+
+    @Override
+    public int outDegree(Vertex<V> v) {
+        int indexV = vertices.indexOf(v);
+        int count = 0;
+        for (int j = 0; j < vertices.size(); j++) {
+            if (adjacencyMatrix[indexV][j] != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int inDegree(Vertex<V> v) {
+        int indexV = vertices.indexOf(v);
+        int count = 0;
+        for (int i = 0; i < vertices.size(); i++) {
+            if (adjacencyMatrix[i][indexV] != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public Iterable<Edge<E>> outgoingEdges(Vertex<V> v) {
+        List<Edge<E>> result = new ArrayList<>();
+        int indexV = vertices.indexOf(v);
+        for (int j = 0; j < vertices.size(); j++) {
+            if (adjacencyMatrix[indexV][j] != null) {
+                result.add(adjacencyMatrix[indexV][j]);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Edge<E>> incomingEdges(Vertex<V> v) {
+        List<Edge<E>> result = new ArrayList<>();
+        int indexV = vertices.indexOf(v);
+        for (int i = 0; i < vertices.size(); i++) {
+            if (adjacencyMatrix[i][indexV] != null) {
+                result.add(adjacencyMatrix[i][indexV]);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Vertex<V> insertVertex(V x) {
+        Vertex<V> newVertex = new Vertex<>(x);
+        vertices.add(newVertex);
+        int newSize = vertices.size();
+        Edge<E>[][] newMatrix = (Edge<E>[][]) new Edge[newSize][newSize];
+
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            System.arraycopy(adjacencyMatrix[i], 0, newMatrix[i], 0, adjacencyMatrix.length);
+        }
+        adjacencyMatrix = newMatrix; // Update the adjacency matrix to the new larger matrix
+        return newVertex;
+    }
+
+    @Override
+    public Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E x) {
+        int indexU = vertices.indexOf(u);
+        int indexV = vertices.indexOf(v);
+        if (indexU == -1 || indexV == -1)
+            throw new IllegalArgumentException("One or more vertices not found");
+
+        if (adjacencyMatrix[indexU][indexV] != null)
+            throw new IllegalArgumentException("Edge already exists between the given vertices");
+
+        Edge<E> newEdge = new Edge<>(x);
+        adjacencyMatrix[indexU][indexV] = newEdge;
+        if (!isDirected()) {
+            adjacencyMatrix[indexV][indexU] = newEdge;
+        }
+        return newEdge;
+    }
+
+    @Override
+    public void removeVertex(Vertex<V> v) {
+        int indexV = vertices.indexOf(v);
+        if (indexV == -1)
+            throw new IllegalArgumentException("Vertex not found");
+
+        vertices.remove(indexV);
+        int newSize = vertices.size();
+        Edge<E>[][] newMatrix = (Edge<E>[][]) new Edge[newSize][newSize];
+
+        for (int i = 0, k = 0; i <= newSize; i++) {
+            if (i == indexV) continue; // Skip the removed vertex
+            for (int j = 0, l = 0; j <= newSize; j++) {
+                if (j == indexV) continue; // Skip the removed vertex
+                newMatrix[k][l] = adjacencyMatrix[i][j];
+                l++;
+            }
+            k++;
+        }
+        adjacencyMatrix = newMatrix;
+    }
+
+    @Override
+    public void removeEdge(Edge<E> e) {
+        for (int i = 0; i < vertices.size(); i++) {
+            for (int j = 0; j < vertices.size(); j++) {
+                if (adjacencyMatrix[i][j] == e) {
+                    adjacencyMatrix[i][j] = null;
+                    if (!isDirected()) {
+                        adjacencyMatrix[j][i] = null;
+                    }
+                    return;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Edge not found in the graph");
     }
 }
-

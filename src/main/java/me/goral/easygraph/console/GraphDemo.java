@@ -3,6 +3,7 @@ package me.goral.easygraph.console;
 import me.goral.easygraph.classes.*;
 import me.goral.easygraph.algorithms.DijkstraAlgorithm;
 import me.goral.easygraph.generators.GraphGenerator;
+import me.goral.easygraph.generators.JsonLogger;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,12 +12,21 @@ import java.util.List;
 
 public class GraphDemo {
 
-    private static final String CSV_HEADER = "GraphType,Vertices,Density,Instance,ExecutionTime\n";
+    private static final String CSV_HEADER = "GraphType,Vertices,Density,Instance,ExecutionTimeNs\n";
+    // Kody ANSI do ustalania kolorów tekstu
+    static final String ANSI_RESET = "\u001B[0m";
+    static final String ANSI_RED = "\u001B[31m";
+    static final String ANSI_GREEN = "\u001B[32m";
+    static final String ANSI_YELLOW = "\u001B[33m";
+    static final String ANSI_BLUE = "\u001B[34m";
 
     public static void main(String[] args) {
-        int[] numbersOfVertices = {10, 50, 100, 500, 1000};
+
+
+//        int[] numbersOfVertices = {10, 50, 100, 500, 1000};
+        int[] numbersOfVertices = {10, 20};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
-        int instancesPerConfiguration = 100;
+        int instancesPerConfiguration = 2;
         List<String> csvLines = new ArrayList<>();
 
         // Adding CSV header
@@ -24,28 +34,24 @@ public class GraphDemo {
 
         for (int numVertices : numbersOfVertices) {
             for (double density : densities) {
-                for (int i = 0; i < instancesPerConfiguration; i++) {
+                for (int i = 1; i <= instancesPerConfiguration; i++) {
                     // Generate graphs
                     Graph<Integer, Integer> matrixGraph = GraphGenerator.generateAdjacencyMatrixGraph(numVertices, density);
                     Graph<Integer, Integer> listGraph = GraphGenerator.generateAdjacencyListGraph(numVertices, density);
 
-                    // Measure time for matrix graph
-                    long startTimeMatrix = System.nanoTime();
-                    DijkstraAlgorithm.dijkstraDistances(matrixGraph, matrixGraph.vertices().iterator().next());
-                    long endTimeMatrix = System.nanoTime();
-                    long executionTimeMatrix = endTimeMatrix - startTimeMatrix;
-                    csvLines.add("Matrix," + numVertices + "," + density + "," + i + "," + executionTimeMatrix);
+                    // Measure time and handle exceptions for matrix graph
+                    long executionTimeMatrix = measureGraph(matrixGraph);
 
-                    // Measure time for list graph
-                    long startTimeList = System.nanoTime();
-                    DijkstraAlgorithm.dijkstraDistances(listGraph, listGraph.vertices().iterator().next());
-                    long endTimeList = System.nanoTime();
-                    long executionTimeList = endTimeList - startTimeList;
-                    csvLines.add("List," + numVertices + "," + density + "," + i + "," + executionTimeList);
+                    // Measure time and handle exceptions for list graph
+                    long executionTimeList = measureGraph(listGraph);
+
+                    // Save results to CSV
+                    csvLines.add("Matrix," + numVertices + "," + density + "," + i + "," + executionTimeMatrix + "\n");
+                    csvLines.add("List," + numVertices + "," + density + "," + i + "," + executionTimeList + "\n");
 
                     // Print results
-                    System.out.println("Matrix Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeMatrix + " ns");
-                    System.out.println("List Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeList + " ns");
+                    System.out.println(ANSI_GREEN + "Matrix Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeMatrix + " ns" + ANSI_RESET);
+                    System.out.println(ANSI_BLUE +"List Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeList + " ns" + ANSI_RESET);
                 }
             }
         }
@@ -55,11 +61,24 @@ public class GraphDemo {
             for (String csvLine : csvLines) {
                 fileWriter.append(csvLine);
             }
-            System.out.println("CSV file was created successfully.");
+            System.out.println(ANSI_YELLOW + "CSV file was created successfully." + ANSI_RESET);
         } catch (IOException e) {
-            System.out.println("Error in CsvFileWriter.");
-            e.printStackTrace();
+            System.out.println("Error in CsvFileWriter: " + e.getMessage());
         }
     }
+
+    private static long measureGraph(Graph<Integer, Integer> graph) {
+        long startTime = System.nanoTime();
+        try {
+            DijkstraAlgorithm.dijkstraDistances(graph, graph.vertices().iterator().next());
+        } catch (Exception e) {
+            JsonLogger.logToJson("Error", "Failed to execute Dijkstra's algorithm", e.getMessage());
+            System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
+        }
+        long endTime = System.nanoTime();
+        return endTime - startTime;
+    }
+
 }
+
 

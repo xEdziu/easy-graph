@@ -1,10 +1,22 @@
 package me.goral.easygraph.classes;
 
+import me.goral.easygraph.generators.JsonLogger;
+
 import java.util.*;
+
+
 
 public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     private final List<Vertex<V>> vertices;
     private Edge<E>[][] adjacencyMatrix;
+
+    // Kody ANSI do ustalania kolorów tekstu
+    static final String ANSI_RESET = "\u001B[0m";
+    static final String ANSI_RED = "\u001B[31m";
+    static final String ANSI_GREEN = "\u001B[32m";
+    static final String ANSI_YELLOW = "\u001B[33m";
+    static final String ANSI_BLUE = "\u001B[34m";
+
 
     public AdjacencyMatrixGraph(boolean isDirected) {
         super(isDirected);
@@ -77,13 +89,20 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     @Override
     public Vertex<V> opposite(Vertex<V> v, Edge<E> e) {
         Vertex<V>[] endpoints = endVertices(e);
-        if (endpoints[0].equals(v)) {
+        if (endpoints[0] != null && endpoints[0].equals(v)) {
             return endpoints[1];
-        } else if (endpoints[1].equals(v)) {
+        } else if (endpoints[1] != null && endpoints[1].equals(v)) {
             return endpoints[0];
         }
+        // Logowanie, gdy nie znajdzie wierzchołka przeciwnego
+        System.out.println("Failed to find opposite for vertex: " + v + " in edge: " + e + " - AdjacencyMatrixGraph.opposite()");
+        String data = "Edge: " + e + ", Vertex: " + v +
+                ", Opposite vertex not found - AdjacencyMatrixGraph.opposite()";
+        JsonLogger.logToJson("Fail", "Edge not incident to vertex", data);
         throw new IllegalArgumentException("Edge not incident to vertex.");
     }
+
+
 
     @Override
     public int outDegree(Vertex<V> v) {

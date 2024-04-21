@@ -1,5 +1,7 @@
 package me.goral.easygraph;
 
+import me.goral.easygraph.console.GraphDemo;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -8,12 +10,13 @@ public class Main {
         String usagePrint = "Usage: java -jar easygraph-" + version + ".jar [options]";
 
         if (args.length > 0) {
-            if (args[0].equals("--no-gui")) {
-                System.out.println("Running in no-gui mode");
+            if (args[0].equals("--tests")) {
+                System.out.println("Preparing tests. Please wait for the results.");
+                GraphDemo.main(args);
             } else if (args[0].equals("--help")) {
                 System.out.println(usagePrint);
                 System.out.println("Options:");
-                System.out.println("  --no-gui  Run in no-gui mode");
+                System.out.println("  --tests  Run tests for the graphs and algorithms");
                 System.out.println("  --help    Print this help message");
             }
         } else {

@@ -21,8 +21,7 @@ public class GraphDemo {
     static final String ANSI_BLUE = "\u001B[34m";
 
     public static void main(String[] args) {
-//        int[] numbersOfVertices = {10, 50, 100, 500, 1000};
-        int[] numbersOfVertices = {10, 50, 100};
+        int[] numbersOfVertices = {10, 50, 100, 500, 1000};
         double[] densities = {0.25, 0.5, 0.75, 1.0};
         int instancesPerConfiguration = 100;
         List<String> csvLines = new ArrayList<>();
@@ -39,17 +38,15 @@ public class GraphDemo {
 
                     // Measure time and handle exceptions for matrix graph
                     long executionTimeMatrix = measureGraph(matrixGraph);
+                    System.out.println(ANSI_GREEN + "Matrix Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeMatrix + " ns" + ANSI_RESET);
 
                     // Measure time and handle exceptions for list graph
                     long executionTimeList = measureGraph(listGraph);
+                    System.out.println(ANSI_BLUE +"List Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeList + " ns" + ANSI_RESET);
 
                     // Save results to CSV
                     csvLines.add("Matrix," + numVertices + "," + density + "," + i + "," + executionTimeMatrix + "\n");
                     csvLines.add("List," + numVertices + "," + density + "," + i + "," + executionTimeList + "\n");
-
-                    // Print results
-                    System.out.println(ANSI_GREEN + "Matrix Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeMatrix + " ns" + ANSI_RESET);
-                    System.out.println(ANSI_BLUE +"List Graph - Vertices: " + numVertices + ", Density: " + density + ", Instance: " + i + ", Execution Time: " + executionTimeList + " ns" + ANSI_RESET);
                 }
             }
         }

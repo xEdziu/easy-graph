@@ -21,9 +21,26 @@ public class GraphDemo {
     static final String ANSI_BLUE = "\u001B[34m";
 
     public static void main(String[] args) {
-        int[] numbersOfVertices = {10, 50, 100, 500, 1000};
-        double[] densities = {0.25, 0.5, 0.75, 1.0};
+
+        int[] numbersOfVertices = null;
+        double[] densities = null;
         int instancesPerConfiguration = 100;
+        String outputFileName = "";
+
+        if (args.length > 0) {
+            if (args[0].equals("--tests")) {
+                System.out.println("Preparing tests. Please wait for the results.");
+                numbersOfVertices = new int[]{10, 50, 100, 500, 1000};
+                densities = new double[]{0.25, 0.5, 0.75, 1.0};
+                outputFileName = "graph_performance.csv";
+            } else if (args[0].equals("--driver")) {
+                System.out.println("Demo for the graph performance tests. Please wait for the results.");
+                numbersOfVertices = new int[]{10, 50, 100};
+                densities = new double[]{0.25, 0.5, 0.75, 1.0};
+                outputFileName = "demo.csv";
+            }
+        }
+
         List<String> csvLines = new ArrayList<>();
 
         // Adding CSV header
@@ -52,7 +69,7 @@ public class GraphDemo {
         }
 
         // Save results to CSV file
-        try (FileWriter fileWriter = new FileWriter("graph_performance.csv")) {
+        try (FileWriter fileWriter = new FileWriter(outputFileName)) {
             for (String csvLine : csvLines) {
                 fileWriter.append(csvLine);
             }

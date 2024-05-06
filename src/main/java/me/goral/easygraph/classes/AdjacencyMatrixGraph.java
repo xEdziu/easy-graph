@@ -8,6 +8,7 @@ import java.util.*;
 
 public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     private final List<Vertex<V>> vertices;
+    private final Map<Vertex<V>, Integer> vertexIndices;
     private Edge<E>[][] adjacencyMatrix;
 
     // Kody ANSI do ustalania kolorów tekstu
@@ -21,6 +22,7 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     public AdjacencyMatrixGraph(boolean isDirected) {
         super(isDirected);
         vertices = new ArrayList<>();
+        vertexIndices = new HashMap<>();
         adjacencyMatrix = (Edge<E>[][]) new Edge[0][0];
     }
 
@@ -156,6 +158,7 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     public Vertex<V> insertVertex(V x) {
         Vertex<V> newVertex = new Vertex<>(x);
         vertices.add(newVertex);
+        vertexIndices.put(newVertex, vertices.size() - 1);
         int newSize = vertices.size();
         Edge<E>[][] newMatrix = (Edge<E>[][]) new Edge[newSize][newSize];
 
@@ -186,11 +189,12 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
 
     @Override
     public void removeVertex(Vertex<V> v) {
-        int indexV = vertices.indexOf(v);
+        int indexV = vertexIndices.get(v);
         if (indexV == -1)
             throw new IllegalArgumentException("Vertex not found");
 
         vertices.remove(indexV);
+        vertexIndices.remove(v);
         int newSize = vertices.size();
         Edge<E>[][] newMatrix = (Edge<E>[][]) new Edge[newSize][newSize];
 

@@ -144,5 +144,17 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
         }
         return result;
     }
+
+    @Override
+    public void printGraph() {
+        for (Vertex<V> vertex : vertices) {
+            System.out.print(vertex.getElement()+ " -> ");
+            for (Edge<E> edge : outgoingEdges(vertex)) {
+                Vertex<V>[] endpoints = endVertices(edge);
+                System.out.print(endpoints[1].getElement() + " ");
+            }
+            System.out.println();
+        }
+    }
 }
 

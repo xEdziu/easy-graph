@@ -225,4 +225,25 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
         }
         throw new IllegalArgumentException("Edge not found in the graph");
     }
+
+    @Override
+    public void printGraph() {
+        System.out.println("Adjacency Matrix Graph:");
+        System.out.print("    ");
+        for (Vertex<V> vertex : vertices) {
+            System.out.printf("%4s", vertex.getElement());
+        }
+        System.out.println();
+        for (int i = 0; i < adjacencyMatrix.length; i++) {
+            System.out.printf("%4s", vertices.get(i).getElement());
+            for (int j = 0; j < adjacencyMatrix[i].length; j++) {
+                if (adjacencyMatrix[i][j] != null) {
+                    System.out.printf("%4s", adjacencyMatrix[i][j].getElement());
+                } else {
+                    System.out.printf("%4s", "0");
+                }
+            }
+            System.out.println();
+        }
+    }
 }

@@ -138,4 +138,9 @@ public abstract class Graph<V, E> {
     public boolean isDirected() {
         return this.isDirected;
     }
+
+    /**
+     * Prints the graph
+     */
+    public abstract void printGraph();
 }

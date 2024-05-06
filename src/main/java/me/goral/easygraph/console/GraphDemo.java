@@ -24,6 +24,8 @@ public class GraphDemo {
 
         int[] numbersOfVertices = null;
         double[] densities = null;
+        Graph<Integer, Integer> matrixDemo = null;
+        Graph<Integer, Integer> listDemo = null;
         int instancesPerConfiguration = 100;
         String outputFileName = "";
 
@@ -35,8 +37,8 @@ public class GraphDemo {
                 outputFileName = "graph_performance.csv";
             } else if (args[0].equals("--driver")) {
                 System.out.println("Demo for the graph performance tests. Please wait for the results.");
-                numbersOfVertices = new int[]{10, 50, 100};
-                densities = new double[]{0.25, 0.5, 0.75, 1.0};
+                numbersOfVertices = new int[]{5, 10};
+                densities = new double[]{0.25, 0.5};
                 outputFileName = "demo.csv";
             }
         }
@@ -64,8 +66,20 @@ public class GraphDemo {
                     // Save results to CSV
                     csvLines.add("Matrix," + numVertices + "," + density + "," + i + "," + executionTimeMatrix + "\n");
                     csvLines.add("List," + numVertices + "," + density + "," + i + "," + executionTimeList + "\n");
+
+                    if (args[0].equals("--driver")) {
+                        matrixDemo = matrixGraph;
+                        listDemo = listGraph;
+                    }
                 }
             }
+        }
+
+        if (args[0].equals("--driver")) {
+            System.out.println("Matrix Graph:");
+            matrixDemo.printGraph();
+            System.out.println("List Graph:");
+            listDemo.printGraph();
         }
 
         // Save results to CSV file

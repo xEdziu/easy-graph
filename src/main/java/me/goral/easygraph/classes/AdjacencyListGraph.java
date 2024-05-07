@@ -100,10 +100,15 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
 
     @Override
     public Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E element) {
+        // Check if an edge already exists between the vertices
+        if (adjacencyMap.containsKey(u) && adjacencyMap.get(u).containsKey(v)) {
+            return adjacencyMap.get(u).get(v);
+        }
+
         Edge<E> newEdge = new Edge<>(element);
-        adjacencyMap.computeIfAbsent(u, k -> new HashMap<>()).put(v, newEdge);
+        adjacencyMap.get(u).put(v, newEdge);
         if (!isDirected()) {
-            adjacencyMap.computeIfAbsent(v, k -> new HashMap<>()).put(u, newEdge);
+            adjacencyMap.get(v).put(u, newEdge);
         }
         edges.add(newEdge);
         edgeVertices.put(newEdge, new Vertex[]{u, v});

@@ -28,6 +28,7 @@ public class GraphDemo {
         Graph<Integer, Integer> listDemo = null;
         int instancesPerConfiguration = 100;
         String outputFileName = "";
+        boolean isDirected = false;
 
         if (args.length > 0) {
             if (args[0].equals("--tests")) {
@@ -39,6 +40,7 @@ public class GraphDemo {
                 System.out.println("Demo for the graph performance tests. Please wait for the results.");
                 numbersOfVertices = new int[]{5, 10};
                 densities = new double[]{0.25, 0.5};
+                isDirected = true;
                 outputFileName = "demo.csv";
             }
         }
@@ -52,8 +54,8 @@ public class GraphDemo {
             for (double density : densities) {
                 for (int i = 1; i <= instancesPerConfiguration; i++) {
                     // Generate graphs
-                    Graph<Integer, Integer> matrixGraph = GraphGenerator.generateAdjacencyMatrixGraph(numVertices, density);
-                    Graph<Integer, Integer> listGraph = GraphGenerator.generateAdjacencyListGraph(numVertices, density);
+                    Graph<Integer, Integer> matrixGraph = GraphGenerator.generateAdjacencyMatrixGraph(numVertices, density, isDirected);
+                    Graph<Integer, Integer> listGraph = GraphGenerator.generateAdjacencyListGraph(numVertices, density, isDirected);
 
                     // Measure time and handle exceptions for matrix graph
                     long executionTimeMatrix = measureGraph(matrixGraph);
@@ -76,7 +78,6 @@ public class GraphDemo {
         }
 
         if (args[0].equals("--driver")) {
-            System.out.println("Matrix Graph:");
             matrixDemo.printGraph();
             System.out.println("List Graph:");
             listDemo.printGraph();

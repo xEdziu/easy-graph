@@ -170,7 +170,7 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
     }
 
     @Override
-    public Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E x) {
+    public void insertEdge(Vertex<V> u, Vertex<V> v, E x) {
         int indexU = vertices.indexOf(u);
         int indexV = vertices.indexOf(v);
         if (indexU == -1 || indexV == -1)
@@ -184,7 +184,6 @@ public class AdjacencyMatrixGraph<V, E> extends Graph<V, E> {
         if (!isDirected()) {
             adjacencyMatrix[indexV][indexU] = newEdge;
         }
-        return newEdge;
     }
 
     @Override

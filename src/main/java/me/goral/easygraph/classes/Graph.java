@@ -112,12 +112,12 @@ public abstract class Graph<V, E> {
      * Creates and returns a new Edge from vertex u to vertex v,
      * storing element x; an error occurs if there already exists an
      * edge from u to v
+     *
      * @param u vertex u
      * @param v vertex v
      * @param x element x
-     * @return a new Edge from vertex u to vertex v, storing element x
      */
-    public abstract Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E x);
+    public abstract void insertEdge(Vertex<V> u, Vertex<V> v, E x);
 
     /**
      * Removes vertex v and all its incident edges from the graph

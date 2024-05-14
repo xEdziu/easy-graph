@@ -101,7 +101,7 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
 
 
     @Override
-    public Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E element) {
+    public void insertEdge(Vertex<V> u, Vertex<V> v, E element) {
         Edge<E> newEdge = new Edge<>(element);
         adjacencyMap.computeIfAbsent(u, k -> new LinkedHashMap<>()).put(v, newEdge);
         edgeVertices.put(newEdge, new Vertex[]{u, v});
@@ -110,7 +110,6 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
             adjacencyMap.computeIfAbsent(v, k -> new LinkedHashMap<>()).put(u, newEdge);
         }
         edges.add(newEdge);
-        return newEdge;
     }
 
 

@@ -7,10 +7,7 @@ import me.goral.easygraph.generators.JsonLogger;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class GraphDemo {
 
@@ -41,7 +38,7 @@ public class GraphDemo {
                 outputFileName = "graph_performance.csv";
             } else if (args[0].equals("--driver")) {
                 System.out.println("Demo for the graph performance tests. Please wait for the results.");
-                numbersOfVertices = new int[]{5, 7};
+                numbersOfVertices = new int[]{5, 10};
                 densities = new double[]{0.5, 1};
                 outputFileName = "demo.csv";
             }
@@ -105,10 +102,11 @@ public class GraphDemo {
         }
     }
 
-    private static long measureGraph(Graph<Integer, Integer> graph) {
+    private static <V> long measureGraph(Graph<V, Integer> graph) {
         long startTime = System.nanoTime();
         try {
-            DijkstraAlgorithm.dijkstraDistances(graph, graph.vertices().iterator().next());
+            Map<Vertex<V>, Vertex<V>> predecessors = new HashMap<>();
+            DijkstraAlgorithm.dijkstraDistances(graph, graph.vertices().iterator().next(), predecessors);
         } catch (Exception e) {
             JsonLogger.logToJson("Error", "Failed to execute Dijkstra's algorithm", e.getMessage());
             System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
@@ -118,10 +116,20 @@ public class GraphDemo {
     }
 
     private static <V> void printDijkstraDistances(Graph<V, Integer> graph, Vertex<V> source) {
-        Map<Vertex<V>, Integer> distances = DijkstraAlgorithm.dijkstraDistances(graph, source);
+        Map<Vertex<V>, Vertex<V>> predecessors = new HashMap<>();
+        Map<Vertex<V>, Integer> distances = DijkstraAlgorithm.dijkstraDistances(graph, source, predecessors);
         for (Map.Entry<Vertex<V>, Integer> entry : distances.entrySet()) {
-            System.out.println("Distance from " + source.getElement() + " to " + entry.getKey().getElement() + " is " + entry.getValue());
+            System.out.print("Distance from " + source.getElement() + " to " + entry.getKey().getElement() + " is " + entry.getValue());
+            printPath(predecessors, source, entry.getKey());
+            System.out.println();
         }
+    }
+
+    private static <V> void printPath(Map<Vertex<V>, Vertex<V>> predecessors, Vertex<V> source, Vertex<V> target) {
+        if (!target.equals(source)) {
+            printPath(predecessors, source, predecessors.get(target));
+        }
+        System.out.print(" -> " + target.getElement());
     }
 
 }

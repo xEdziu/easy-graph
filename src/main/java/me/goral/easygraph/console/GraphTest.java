@@ -6,6 +6,7 @@ import me.goral.easygraph.classes.AdjacencyMatrixGraph;
 import me.goral.easygraph.classes.Graph;
 import me.goral.easygraph.classes.Vertex;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class GraphTest {
@@ -46,9 +47,19 @@ public class GraphTest {
     }
 
     private static <V> void printDijkstraDistances(Graph<V, Integer> graph, Vertex<V> source) {
-        Map<Vertex<V>, Integer> distances = DijkstraAlgorithm.dijkstraDistances(graph, source);
+        Map<Vertex<V>, Vertex<V>> predecessors = new HashMap<>();
+        Map<Vertex<V>, Integer> distances = DijkstraAlgorithm.dijkstraDistances(graph, source, predecessors);
         for (Map.Entry<Vertex<V>, Integer> entry : distances.entrySet()) {
-            System.out.println("Distance from " + source.getElement() + " to " + entry.getKey().getElement() + " is " + entry.getValue());
+            System.out.print("Distance from " + source.getElement() + " to " + entry.getKey().getElement() + " is " + entry.getValue());
+            printPath(predecessors, source, entry.getKey());
+            System.out.println();
         }
+    }
+
+    private static <V> void printPath(Map<Vertex<V>, Vertex<V>> predecessors, Vertex<V> source, Vertex<V> target) {
+        if (!target.equals(source)) {
+            printPath(predecessors, source, predecessors.get(target));
+        }
+        System.out.print(" -> " + target.getElement());
     }
 }

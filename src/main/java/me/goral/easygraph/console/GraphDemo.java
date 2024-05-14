@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class GraphDemo {
 
@@ -29,6 +31,7 @@ public class GraphDemo {
         int instancesPerConfiguration = 100;
         String outputFileName = "";
         boolean isDirected = false;
+        Random random = new Random(1); // Use the same seed for both graphs
 
         if (args.length > 0) {
             if (args[0].equals("--tests")) {
@@ -38,9 +41,8 @@ public class GraphDemo {
                 outputFileName = "graph_performance.csv";
             } else if (args[0].equals("--driver")) {
                 System.out.println("Demo for the graph performance tests. Please wait for the results.");
-                numbersOfVertices = new int[]{5, 10};
-                densities = new double[]{0.25, 0.5};
-                isDirected = true;
+                numbersOfVertices = new int[]{5, 7};
+                densities = new double[]{0.5, 1};
                 outputFileName = "demo.csv";
             }
         }
@@ -54,8 +56,8 @@ public class GraphDemo {
             for (double density : densities) {
                 for (int i = 1; i <= instancesPerConfiguration; i++) {
                     // Generate graphs
-                    Graph<Integer, Integer> matrixGraph = GraphGenerator.generateAdjacencyMatrixGraph(numVertices, density, isDirected);
-                    Graph<Integer, Integer> listGraph = GraphGenerator.generateAdjacencyListGraph(numVertices, density, isDirected);
+                    Graph<Integer, Integer> matrixGraph = GraphGenerator.generateAdjacencyMatrixGraph(numVertices, density, isDirected, random);
+                    Graph<Integer, Integer> listGraph = GraphGenerator.generateAdjacencyListGraph(numVertices, density, isDirected, random);
 
                     // Measure time and handle exceptions for matrix graph
                     long executionTimeMatrix = measureGraph(matrixGraph);
@@ -78,9 +80,18 @@ public class GraphDemo {
         }
 
         if (args[0].equals("--driver")) {
+            Vertex<Integer> sourceMatrix = matrixDemo.vertices().iterator().next();
+            Vertex<Integer> sourceList = listDemo.vertices().iterator().next();
+
+            System.out.println("Matrix Graph:");
             matrixDemo.printGraph();
+            System.out.println("Dijkstra distances for Matrix Graph:");
+            printDijkstraDistances(matrixDemo, sourceMatrix);
+
             System.out.println("List Graph:");
             listDemo.printGraph();
+            System.out.println("Dijkstra distances for List Graph:");
+            printDijkstraDistances(listDemo, sourceList);
         }
 
         // Save results to CSV file
@@ -106,6 +117,11 @@ public class GraphDemo {
         return endTime - startTime;
     }
 
+    private static <V> void printDijkstraDistances(Graph<V, Integer> graph, Vertex<V> source) {
+        Map<Vertex<V>, Integer> distances = DijkstraAlgorithm.dijkstraDistances(graph, source);
+        for (Map.Entry<Vertex<V>, Integer> entry : distances.entrySet()) {
+            System.out.println("Distance from " + source.getElement() + " to " + entry.getKey().getElement() + " is " + entry.getValue());
+        }
+    }
+
 }
-
-

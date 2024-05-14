@@ -10,7 +10,7 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
 
     public AdjacencyListGraph(boolean isDirected) {
         super(isDirected);
-        adjacencyMap = new HashMap<>();
+        adjacencyMap = new LinkedHashMap<>();
         edgeVertices = new HashMap<>();
         vertices = new ArrayList<>();
         edges = new ArrayList<>();
@@ -63,11 +63,12 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
 
     @Override
     public Optional<Edge<E>> getEdge(Vertex<V> u, Vertex<V> v) {
-        if (adjacencyMap.containsKey(u)) {
-            return Optional.ofNullable(adjacencyMap.get(u).get(v));
+        if (adjacencyMap.containsKey(u) && adjacencyMap.get(u).containsKey(v)) {
+            return Optional.of(adjacencyMap.get(u).get(v));
         }
         return Optional.empty();
     }
+
 
     @Override
     public int outDegree(Vertex<V> v) {
@@ -94,26 +95,24 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
     public Vertex<V> insertVertex(V element) {
         Vertex<V> newVertex = new Vertex<>(element);
         vertices.add(newVertex);
-        adjacencyMap.put(newVertex, new HashMap<>());
+        adjacencyMap.put(newVertex, new LinkedHashMap<>());  // Use LinkedHashMap to maintain order
         return newVertex;
     }
 
+
     @Override
     public Edge<E> insertEdge(Vertex<V> u, Vertex<V> v, E element) {
-        // Check if an edge already exists between the vertices
-        if (adjacencyMap.containsKey(u) && adjacencyMap.get(u).containsKey(v)) {
-            return adjacencyMap.get(u).get(v);
-        }
-
         Edge<E> newEdge = new Edge<>(element);
-        adjacencyMap.get(u).put(v, newEdge);
+        adjacencyMap.computeIfAbsent(u, k -> new LinkedHashMap<>()).put(v, newEdge);
+        edgeVertices.put(newEdge, new Vertex[]{u, v});
+
         if (!isDirected()) {
-            adjacencyMap.get(v).put(u, newEdge);
+            adjacencyMap.computeIfAbsent(v, k -> new LinkedHashMap<>()).put(u, newEdge);
         }
         edges.add(newEdge);
-        edgeVertices.put(newEdge, new Vertex[]{u, v});
         return newEdge;
     }
+
 
     @Override
     public void removeVertex(Vertex<V> v) {
@@ -153,13 +152,11 @@ public class AdjacencyListGraph<V, E> extends Graph<V, E> {
     @Override
     public void printGraph() {
         for (Vertex<V> vertex : vertices) {
-            System.out.print(vertex.getElement()+ " -> ");
-            for (Edge<E> edge : outgoingEdges(vertex)) {
-                Vertex<V>[] endpoints = endVertices(edge);
-                System.out.print(endpoints[1].getElement() + " ");
-            }
+            System.out.print(vertex.getElement() + " -> ");
+            adjacencyMap.get(vertex).forEach((adjVertex, edge) -> System.out.print(adjVertex.getElement() + " "));
             System.out.println();
         }
     }
+
 }
 
